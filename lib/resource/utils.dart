@@ -17,3 +17,11 @@ String timeToStringConvert(TimeOfDay time) {
     return '12:00 pm';
   }
 }
+
+String dateToStringConvert(DateTime date) {
+  try {
+    return DateFormat.yMMMd().format(date);
+  } catch (e) {
+    return 'Feb, 29';
+  }
+}

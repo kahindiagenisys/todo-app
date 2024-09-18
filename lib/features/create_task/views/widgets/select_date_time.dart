@@ -13,14 +13,14 @@ class SelectDateTime extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final date = ref.watch(dateViewModel);
-    final time = ref.watch(timeViewModel);
+    final date = ref.watch(dateProvider);
+    final time = ref.watch(timeProvider);
     return Row(
       children: [
         Expanded(
           child: CommonTextField(
             title: "Date",
-            hintText: DateFormat.yMMMd().format(date),
+            hintText: dateToStringConvert(date),
             readOnly: true,
             suffixIcon: IconButton(
               onPressed: () => _selectDate(context, ref),
@@ -51,14 +51,14 @@ class SelectDateTime extends ConsumerWidget {
     );
 
     if (pickTime != null) {
-      ref.read(timeViewModel.notifier).state = pickTime;
+      ref.read(timeProvider.notifier).state = pickTime;
     }
   }
 
   Future<void> _selectDate(BuildContext ctx, WidgetRef ref) async {
     int nowYear = DateTime.now().year;
 
-    final initialDate = ref.read(dateViewModel);
+    final initialDate = ref.read(dateProvider);
 
     DateTime? pickDate = await showDatePicker(
       context: ctx,
@@ -68,7 +68,7 @@ class SelectDateTime extends ConsumerWidget {
     );
 
     if (pickDate != null) {
-      ref.read(dateViewModel.notifier).state = pickDate;
+      ref.read(dateProvider.notifier).state = pickDate;
     }
   }
 }

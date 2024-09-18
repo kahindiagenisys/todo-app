@@ -1,12 +1,18 @@
 import 'package:drift/drift.dart';
 import 'package:river_pod/database/connection/connection.dart';
+import 'package:river_pod/database/dao/task_dao.dart';
 import 'package:river_pod/database/tables/task.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [
-  TaskTable,
-], daos: [])
+@DriftDatabase(
+  tables: [
+    TaskTable,
+  ],
+  daos: [
+    TaskDao,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase._(super.e);
 

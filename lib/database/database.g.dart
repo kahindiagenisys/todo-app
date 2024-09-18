@@ -11,7 +11,7 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
+      'id', aliasedName, true,
       hasAutoIncrement: true,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
@@ -25,8 +25,8 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
-      'note', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'note', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _timeMeta = const VerificationMeta('time');
   @override
   late final GeneratedColumn<String> time = GeneratedColumn<String>(
@@ -43,9 +43,10 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
   late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
       'is_completed', aliasedName, false,
       type: DriftSqlType.bool,
-      requiredDuringInsert: true,
+      requiredDuringInsert: false,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("is_completed" IN (0, 1))'));
+          'CHECK ("is_completed" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _categoryMeta =
       const VerificationMeta('category');
   @override
@@ -77,6 +78,8 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
     if (data.containsKey('note')) {
       context.handle(
           _noteMeta, note.isAcceptableOrUnknown(data['note']!, _noteMeta));
+    } else if (isInserting) {
+      context.missing(_noteMeta);
     }
     if (data.containsKey('time')) {
       context.handle(
@@ -95,8 +98,6 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
           _isCompletedMeta,
           isCompleted.isAcceptableOrUnknown(
               data['is_completed']!, _isCompletedMeta));
-    } else if (isInserting) {
-      context.missing(_isCompletedMeta);
     }
     if (data.containsKey('category')) {
       context.handle(_categoryMeta,
@@ -114,11 +115,11 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Task(
       id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}id']),
       title: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       note: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}note']),
+          .read(DriftSqlType.string, data['${effectivePrefix}note'])!,
       time: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}time'])!,
       date: attachedDatabase.typeMapping
@@ -137,17 +138,17 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
 }
 
 class Task extends DataClass implements Insertable<Task> {
-  final int id;
+  final int? id;
   final String title;
-  final String? note;
+  final String note;
   final String time;
   final String date;
   final bool isCompleted;
   final String category;
   const Task(
-      {required this.id,
+      {this.id,
       required this.title,
-      this.note,
+      required this.note,
       required this.time,
       required this.date,
       required this.isCompleted,
@@ -155,11 +156,11 @@ class Task extends DataClass implements Insertable<Task> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['title'] = Variable<String>(title);
-    if (!nullToAbsent || note != null) {
-      map['note'] = Variable<String>(note);
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
     }
+    map['title'] = Variable<String>(title);
+    map['note'] = Variable<String>(note);
     map['time'] = Variable<String>(time);
     map['date'] = Variable<String>(date);
     map['is_completed'] = Variable<bool>(isCompleted);
@@ -169,9 +170,9 @@ class Task extends DataClass implements Insertable<Task> {
 
   TaskTableCompanion toCompanion(bool nullToAbsent) {
     return TaskTableCompanion(
-      id: Value(id),
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
       title: Value(title),
-      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      note: Value(note),
       time: Value(time),
       date: Value(date),
       isCompleted: Value(isCompleted),
@@ -183,9 +184,9 @@ class Task extends DataClass implements Insertable<Task> {
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Task(
-      id: serializer.fromJson<int>(json['id']),
+      id: serializer.fromJson<int?>(json['id']),
       title: serializer.fromJson<String>(json['title']),
-      note: serializer.fromJson<String?>(json['note']),
+      note: serializer.fromJson<String>(json['note']),
       time: serializer.fromJson<String>(json['time']),
       date: serializer.fromJson<String>(json['date']),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
@@ -196,9 +197,9 @@ class Task extends DataClass implements Insertable<Task> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
+      'id': serializer.toJson<int?>(id),
       'title': serializer.toJson<String>(title),
-      'note': serializer.toJson<String?>(note),
+      'note': serializer.toJson<String>(note),
       'time': serializer.toJson<String>(time),
       'date': serializer.toJson<String>(date),
       'isCompleted': serializer.toJson<bool>(isCompleted),
@@ -207,17 +208,17 @@ class Task extends DataClass implements Insertable<Task> {
   }
 
   Task copyWith(
-          {int? id,
+          {Value<int?> id = const Value.absent(),
           String? title,
-          Value<String?> note = const Value.absent(),
+          String? note,
           String? time,
           String? date,
           bool? isCompleted,
           String? category}) =>
       Task(
-        id: id ?? this.id,
+        id: id.present ? id.value : this.id,
         title: title ?? this.title,
-        note: note.present ? note.value : this.note,
+        note: note ?? this.note,
         time: time ?? this.time,
         date: date ?? this.date,
         isCompleted: isCompleted ?? this.isCompleted,
@@ -267,9 +268,9 @@ class Task extends DataClass implements Insertable<Task> {
 }
 
 class TaskTableCompanion extends UpdateCompanion<Task> {
-  final Value<int> id;
+  final Value<int?> id;
   final Value<String> title;
-  final Value<String?> note;
+  final Value<String> note;
   final Value<String> time;
   final Value<String> date;
   final Value<bool> isCompleted;
@@ -286,15 +287,15 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
   TaskTableCompanion.insert({
     this.id = const Value.absent(),
     required String title,
-    this.note = const Value.absent(),
+    required String note,
     required String time,
     required String date,
-    required bool isCompleted,
+    this.isCompleted = const Value.absent(),
     required String category,
   })  : title = Value(title),
+        note = Value(note),
         time = Value(time),
         date = Value(date),
-        isCompleted = Value(isCompleted),
         category = Value(category);
   static Insertable<Task> custom({
     Expression<int>? id,
@@ -317,9 +318,9 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
   }
 
   TaskTableCompanion copyWith(
-      {Value<int>? id,
+      {Value<int?>? id,
       Value<String>? title,
-      Value<String?>? note,
+      Value<String>? note,
       Value<String>? time,
       Value<String>? date,
       Value<bool>? isCompleted,
@@ -381,6 +382,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $TaskTableTable taskTable = $TaskTableTable(this);
+  late final TaskDao taskDao = TaskDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -389,18 +391,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 }
 
 typedef $$TaskTableTableCreateCompanionBuilder = TaskTableCompanion Function({
-  Value<int> id,
+  Value<int?> id,
   required String title,
-  Value<String?> note,
+  required String note,
   required String time,
   required String date,
-  required bool isCompleted,
+  Value<bool> isCompleted,
   required String category,
 });
 typedef $$TaskTableTableUpdateCompanionBuilder = TaskTableCompanion Function({
-  Value<int> id,
+  Value<int?> id,
   Value<String> title,
-  Value<String?> note,
+  Value<String> note,
   Value<String> time,
   Value<String> date,
   Value<bool> isCompleted,
@@ -505,9 +507,9 @@ class $$TaskTableTableTableManager extends RootTableManager<
           orderingComposer:
               $$TaskTableTableOrderingComposer(ComposerState(db, table)),
           updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
+            Value<int?> id = const Value.absent(),
             Value<String> title = const Value.absent(),
-            Value<String?> note = const Value.absent(),
+            Value<String> note = const Value.absent(),
             Value<String> time = const Value.absent(),
             Value<String> date = const Value.absent(),
             Value<bool> isCompleted = const Value.absent(),
@@ -523,12 +525,12 @@ class $$TaskTableTableTableManager extends RootTableManager<
             category: category,
           ),
           createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
+            Value<int?> id = const Value.absent(),
             required String title,
-            Value<String?> note = const Value.absent(),
+            required String note,
             required String time,
             required String date,
-            required bool isCompleted,
+            Value<bool> isCompleted = const Value.absent(),
             required String category,
           }) =>
               TaskTableCompanion.insert(

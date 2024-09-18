@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:river_pod/core/enum.dart';
 import 'package:river_pod/core/extensions/build_context_extensions.dart';
 import 'package:river_pod/core/widgets/circle_container.dart';
-import 'package:river_pod/models/task/task.dart';
+import 'package:river_pod/database/database.dart';
 
 class DisplayTaskTitle extends StatelessWidget {
   const DisplayTaskTitle({
@@ -11,7 +12,7 @@ class DisplayTaskTitle extends StatelessWidget {
     this.onCompleted,
   });
 
-  final TaskModel task;
+  final Task task;
   final Function(bool?)? onCompleted;
 
   @override
@@ -22,16 +23,16 @@ class DisplayTaskTitle extends StatelessWidget {
     final textDecoration =
         task.isCompleted ? TextDecoration.lineThrough : TextDecoration.none;
     final fontWeight = task.isCompleted ? FontWeight.normal : FontWeight.bold;
-
+    final taskCategory = getCategoryByString(task.category);
     return Padding(
       padding: const EdgeInsets.only(left: 16, top: 10, bottom: 10),
       child: Row(
         children: [
           CircleContainer(
-            color: task.category.color.withOpacity(backgroundOpacity),
+            color: taskCategory.color.withOpacity(backgroundOpacity),
             child: Icon(
-              task.category.icon,
-              color: task.category.color.withOpacity(iconOpacity),
+              taskCategory.icon,
+              color: taskCategory.color.withOpacity(iconOpacity),
             ),
           ),
           16.width,

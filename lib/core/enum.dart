@@ -19,3 +19,27 @@ enum TaskCategories {
     this.color,
   );
 }
+
+TaskCategories getCategoryByString(String key) {
+  switch (key) {
+    case "education":
+      return TaskCategories.education;
+    case "health":
+      return TaskCategories.health;
+    case "home":
+      return TaskCategories.home;
+    case "personal":
+      return TaskCategories.personal;
+    case "shopping":
+      return TaskCategories.shopping;
+    case "social":
+      return TaskCategories.social;
+    case "travel":
+      return TaskCategories.travel;
+    case "work":
+      return TaskCategories.work;
+
+    default:
+      return TaskCategories.others;
+  }
+}

@@ -1,20 +1,21 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:river_pod/core/enum.dart';
 import 'package:river_pod/core/extensions/build_context_extensions.dart';
+import 'package:river_pod/database/database.dart';
 import 'package:river_pod/features/home/views/widgets/display_list_of_tasks.dart';
 import 'package:river_pod/core/widgets/display_white_text.dart';
-import 'package:river_pod/models/task/task.dart';
 import 'package:river_pod/resource/constant.dart';
 import 'package:river_pod/routes/app_router.gr.dart';
+import 'package:river_pod/state/global_task_state.dart';
 
 @RoutePage()
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colorScheme;
     final deviceSize = context.deviceSize;
     return SafeArea(
@@ -55,27 +56,26 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const DisplayListOfTasks(
-                      tasks: [
-                        TaskModel(
-                          id: 1,
-                          title: "Title",
-                          note: "is note data",
-                          time: "10:12",
-                          date: "Aug 09",
-                          isCompleted: false,
-                          category: TaskCategories.others,
-                        ),
-                        TaskModel(
-                          id: 1,
-                          title: "Second Title",
-                          note: "is note data",
-                          time: "11:02",
-                          date: "Aug 09",
-                          isCompleted: false,
-                          category: TaskCategories.work,
-                        ),
-                      ],
+                    Consumer(
+                      builder: (context, ref, child) {
+
+                        return StreamBuilder(
+                          stream: ref.read(taskProvider).getAllTaskData(),
+                          builder: (context, snapshot) {
+                            List<Task> taskData = <Task>[];
+                            if (snapshot.hasData &&
+                                snapshot.data != null &&
+                                snapshot.data!.isNotEmpty) {
+                              taskData = snapshot.data!;
+                              // ref.read(taskProvider).st;
+                            }
+
+                            return DisplayListOfTasks(
+                              tasks: taskData,
+                            );
+                          },
+                        );
+                      },
                     ),
                     12.height,
                     Text(
@@ -83,28 +83,25 @@ class HomeScreen extends StatelessWidget {
                       style: context.textTheme.headlineMedium,
                     ),
                     12.height,
-                    const DisplayListOfTasks(
-                      tasks: [
-                        TaskModel(
-                          id: 1,
-                          title: "Title",
-                          note: "is note data",
-                          time: "10:12",
-                          date: "Aug 09",
-                          isCompleted: true,
-                          category: TaskCategories.others,
-                        ),
-                        TaskModel(
-                          id: 1,
-                          title: "Second Title",
-                          note: "is note data",
-                          time: "11:02",
-                          date: "Aug 09",
-                          isCompleted: true,
-                          category: TaskCategories.work,
-                        ),
-                      ],
-                      isCompleted: true,
+                    Consumer(
+                      builder: (context, ref, child) {
+                        return StreamBuilder(
+                          stream: ref.read(taskProvider).getAllTaskData(),
+                          builder: (context, snapshot) {
+                            List<Task> taskData = <Task>[];
+                            if (snapshot.hasData &&
+                                snapshot.data != null &&
+                                snapshot.data!.isNotEmpty) {
+                              taskData = snapshot.data!;
+                            }
+
+                            return DisplayListOfTasks(
+                              tasks: taskData,
+                              isCompleted: true,
+                            );
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -113,7 +110,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         floatingActionButton: ElevatedButton(
-          onPressed: () => context.router.push(const CreateTaskRoute()),
+          onPressed: () => context.router.push(CreateTaskRoute()),
           child: const Padding(
             padding: EdgeInsets.all(8.0),
             child: DisplayWhiteText(text: createTaskScreenTitle),
