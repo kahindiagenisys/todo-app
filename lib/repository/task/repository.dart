@@ -1,7 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:river_pod/database/dao/task_dao.dart';
 import 'package:river_pod/database/database.dart';
 import 'package:river_pod/initialized.dart';
 import 'package:river_pod/repository/task/interface.dart';
+
+final taskRepository = Provider((ref) => TaskRepository(),);
+
 
 class TaskRepository implements InterFace {
   @override

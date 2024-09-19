@@ -24,6 +24,7 @@ class DisplayListOfTasks extends ConsumerWidget {
     final height =
         isCompleted ? deviceSize.height * 0.25 : deviceSize.height * 0.30;
     final emptyTasksMessage = isCompleted ? completedTaskEmpty : taskEmpty;
+    final taskLocator = ref.read(taskProvider);
     return CommonContainer(
       height: height,
       child: tasks.isEmpty
@@ -41,30 +42,13 @@ class DisplayListOfTasks extends ConsumerWidget {
               itemBuilder: (ctx, index) {
                 final task = tasks[index];
                 return InkWell(
-                  onLongPress: () {
-                    if (isCompleted) {
-                      return;
-                    }
-                    ref.read(taskProvider).deleteTask(task.id!);
-                  },
-                  onTap: () async {
-                    await showModalBottomSheet(
-                      context: context,
-                      builder: (ctx) {
-                        return TaskDetails(task: task);
-                      },
-                    );
-                  },
+                  onLongPress: () => onLongPress(taskLocator, task),
+                  onTap: () => onTap(ctx, task),
                   child: DisplayTaskTitle(
-                      task: task,
-                      onCompleted: (value) {
-                        if (isCompleted) {
-                          return;
-                        }
-                        ref
-                            .read(taskProvider)
-                            .toggleCompletedStatus(value!, task.id!);
-                      }),
+                    task: task,
+                    onCompleted: (value) =>
+                        onCompleted(value, taskLocator, task),
+                  ),
                 );
               },
               separatorBuilder: (context, taskId) {
@@ -74,5 +58,28 @@ class DisplayListOfTasks extends ConsumerWidget {
               },
             ),
     );
+  }
+
+  void onLongPress(taskLocator, task) {
+    if (isCompleted) {
+      return;
+    }
+    taskLocator.deleteTask(task.id!);
+  }
+
+  void onTap(ctx, task) async {
+    await showModalBottomSheet(
+      context: ctx,
+      builder: (ctx) {
+        return TaskDetails(task: task);
+      },
+    );
+  }
+
+  void onCompleted(value, taskLocator, task) {
+    if (isCompleted) {
+      return;
+    }
+    taskLocator.toggleCompletedStatus(value!, task.id!);
   }
 }

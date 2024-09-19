@@ -12,13 +12,18 @@ final taskProvider = StateProvider((ref) {
 });
 
 class TaskViewModel extends StateNotifier<List<Task>> {
-  TaskViewModel(this.ref, [List<Task>? tasks]) : super(tasks ?? []);
+  TaskViewModel(
+    this.ref,
+  ) : super([]);
 
   final Ref ref;
-  final taskInterFace = TaskRepository();
 
   void initTaskData(List<Task> updatedTasks) {
-    state = updatedTasks;
+    try {
+      state = updatedTasks;
+    } catch (r) {
+      log("Error is : ${r}");
+    }
   }
 
   Future<void> addTask(
@@ -35,7 +40,7 @@ class TaskViewModel extends StateNotifier<List<Task>> {
         isCompleted: false,
       );
 
-      await taskInterFace.onCreate(task);
+      await ref.read(taskRepository).onCreate(task);
       onSuccess();
     } catch (e) {
       log(e.toString());
@@ -52,7 +57,7 @@ class TaskViewModel extends StateNotifier<List<Task>> {
         isCompleted: updatedStatus,
       );
       log("Task is :: $updatedTask");
-      taskInterFace.onUpdateTask(updatedTask);
+      ref.read(taskRepository).onUpdateTask(updatedTask);
     } catch (e) {
       log(e.toString());
       toast(e.toString());
@@ -60,12 +65,10 @@ class TaskViewModel extends StateNotifier<List<Task>> {
   }
 
   Stream<List<Task>> getTaskByIsCompleted(bool isCompleted) {
-    return taskInterFace.getAllTaskData(isCompleted);
+    return ref.read(taskRepository).getAllTaskData(isCompleted);
   }
 
-
-  void deleteTask(int taskId){
-    taskInterFace.onDeleteTask(taskId);
+  void deleteTask(int taskId) {
+    ref.read(taskRepository).onDeleteTask(taskId);
   }
-
 }
