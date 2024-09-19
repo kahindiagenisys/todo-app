@@ -38,7 +38,6 @@ TaskCategories getCategoryByString(String key) {
       return TaskCategories.travel;
     case "work":
       return TaskCategories.work;
-
     default:
       return TaskCategories.others;
   }

@@ -10,7 +10,7 @@ class SelectCategory extends ConsumerWidget {
   const SelectCategory({super.key});
 
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final categories = TaskCategories.values.toList();
     final selectedCategory = ref.watch(categoryViewModel);
     return SizedBox(
@@ -30,16 +30,21 @@ class SelectCategory extends ConsumerWidget {
               separatorBuilder: (ctx, index) => 8.width,
               itemBuilder: (ctx, index) {
                 final category = categories[index];
+                final selected = category == selectedCategory;
                 return InkWell(
                   borderRadius: BorderRadius.circular(30),
                   onTap: () {
                     ref.read(categoryViewModel.notifier).state = category;
                   },
                   child: CircleContainer(
-                    color: category == selectedCategory ? context.colorScheme.primary.withOpacity(0.3) : category.color.withOpacity(0.1),
+                    color: selected
+                        ? context.colorScheme.primary.withOpacity(0.3)
+                        : category.color.withOpacity(0.1),
                     child: Icon(
                       category.icon,
-                      color: category == selectedCategory ? context.colorScheme.primary : category.color.withOpacity(0.3),
+                      color: selected
+                          ? context.colorScheme.primary
+                          : category.color.withOpacity(0.3),
                     ),
                   ),
                 );

@@ -57,7 +57,7 @@ class CreateTaskScreen extends ConsumerWidget {
                   ref.read(taskProvider).addTask(
                         title: titleTextController.text,
                         note: noteTextController.text,
-                    onSuccess: () => _onSuccess(context),
+                        onSuccess: () => _onSuccess(context),
                       );
                 },
                 child: const DisplayWhiteText(text: "Save"),

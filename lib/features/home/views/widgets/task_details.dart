@@ -5,7 +5,6 @@ import 'package:river_pod/core/extensions/build_context_extensions.dart';
 import 'package:river_pod/core/widgets/circle_container.dart';
 import 'package:river_pod/database/database.dart';
 
-
 class TaskDetails extends StatelessWidget {
   const TaskDetails({super.key, required this.task});
 
@@ -40,7 +39,7 @@ class TaskDetails extends StatelessWidget {
           ),
           16.height,
           Visibility(
-            visible: !task.isCompleted!,
+            visible: !task.isCompleted,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -65,7 +64,7 @@ class TaskDetails extends StatelessWidget {
           ),
           16.height,
           Visibility(
-            visible: task.isCompleted!,
+            visible: task.isCompleted,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

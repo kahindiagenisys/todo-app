@@ -13,9 +13,8 @@ class CommonContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = context.deviceSize;
     return Container(
-      width: deviceSize.width,
+      width: context.deviceSize.width,
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),

@@ -22,7 +22,7 @@ class TaskViewModel extends StateNotifier<List<Task>> {
     try {
       state = updatedTasks;
     } catch (r) {
-      log("Error is : ${r}");
+      log("Error is : $r");
     }
   }
 
@@ -56,7 +56,6 @@ class TaskViewModel extends StateNotifier<List<Task>> {
       Task updatedTask = isTask.copyWith(
         isCompleted: updatedStatus,
       );
-      log("Task is :: $updatedTask");
       ref.read(taskRepository).onUpdateTask(updatedTask);
     } catch (e) {
       log(e.toString());
