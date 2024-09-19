@@ -43,10 +43,9 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
   late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
       'is_completed', aliasedName, false,
       type: DriftSqlType.bool,
-      requiredDuringInsert: false,
+      requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("is_completed" IN (0, 1))'),
-      defaultValue: const Constant(false));
+          'CHECK ("is_completed" IN (0, 1))'));
   static const VerificationMeta _categoryMeta =
       const VerificationMeta('category');
   @override
@@ -98,6 +97,8 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
           _isCompletedMeta,
           isCompleted.isAcceptableOrUnknown(
               data['is_completed']!, _isCompletedMeta));
+    } else if (isInserting) {
+      context.missing(_isCompletedMeta);
     }
     if (data.containsKey('category')) {
       context.handle(_categoryMeta,
@@ -290,12 +291,13 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
     required String note,
     required String time,
     required String date,
-    this.isCompleted = const Value.absent(),
+    required bool isCompleted,
     required String category,
   })  : title = Value(title),
         note = Value(note),
         time = Value(time),
         date = Value(date),
+        isCompleted = Value(isCompleted),
         category = Value(category);
   static Insertable<Task> custom({
     Expression<int>? id,
@@ -396,7 +398,7 @@ typedef $$TaskTableTableCreateCompanionBuilder = TaskTableCompanion Function({
   required String note,
   required String time,
   required String date,
-  Value<bool> isCompleted,
+  required bool isCompleted,
   required String category,
 });
 typedef $$TaskTableTableUpdateCompanionBuilder = TaskTableCompanion Function({
@@ -530,7 +532,7 @@ class $$TaskTableTableTableManager extends RootTableManager<
             required String note,
             required String time,
             required String date,
-            Value<bool> isCompleted = const Value.absent(),
+            required bool isCompleted,
             required String category,
           }) =>
               TaskTableCompanion.insert(

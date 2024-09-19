@@ -7,5 +7,5 @@ abstract class InterFace {
 
   Future<void> onUpdateTask(Task updatedTask);
 
-  Stream<List<Task>> getAllTaskData();
+  Stream<List<Task>> getAllTaskData(bool isCompleted);
 }

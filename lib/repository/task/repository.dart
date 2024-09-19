@@ -34,9 +34,9 @@ class TaskRepository implements InterFace {
   }
 
   @override
-  Stream<List<Task>> getAllTaskData() {
+  Stream<List<Task>> getAllTaskData(bool isCompleted) {
     try {
-      return TaskDao(appDataBase).getAllTask();
+      return TaskDao(appDataBase).getAllTask(isCompleted);
     } catch (e) {
       rethrow;
     }

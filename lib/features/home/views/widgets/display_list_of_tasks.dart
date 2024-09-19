@@ -19,7 +19,7 @@ class DisplayListOfTasks extends ConsumerWidget {
   final bool isCompleted;
 
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final deviceSize = context.deviceSize;
     final height =
         isCompleted ? deviceSize.height * 0.25 : deviceSize.height * 0.30;
@@ -42,7 +42,10 @@ class DisplayListOfTasks extends ConsumerWidget {
                 final task = tasks[index];
                 return InkWell(
                   onLongPress: () {
-                    //TODO:: delete task
+                    if (isCompleted) {
+                      return;
+                    }
+                    ref.read(taskProvider).deleteTask(task.id!);
                   },
                   onTap: () async {
                     await showModalBottomSheet(
@@ -53,9 +56,15 @@ class DisplayListOfTasks extends ConsumerWidget {
                     );
                   },
                   child: DisplayTaskTitle(
-                    task: task,
-                    onCompleted: (value) => ref.read(taskProvider).toggleCompletedStatus(value!,task.id!),
-                  ),
+                      task: task,
+                      onCompleted: (value) {
+                        if (isCompleted) {
+                          return;
+                        }
+                        ref
+                            .read(taskProvider)
+                            .toggleCompletedStatus(value!, task.id!);
+                      }),
                 );
               },
               separatorBuilder: (context, taskId) {

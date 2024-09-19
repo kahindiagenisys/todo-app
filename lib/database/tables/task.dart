@@ -12,7 +12,7 @@ class TaskTable extends Table {
 
   TextColumn get date => text()();
 
-  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  BoolColumn get isCompleted => boolean()();
 
   TextColumn get category => text()();
 

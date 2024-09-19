@@ -60,14 +60,14 @@ class HomeScreen extends ConsumerWidget {
                       builder: (context, ref, child) {
 
                         return StreamBuilder(
-                          stream: ref.read(taskProvider).getAllTaskData(),
+                          stream: ref.read(taskProvider).getTaskByIsCompleted(false),
                           builder: (context, snapshot) {
                             List<Task> taskData = <Task>[];
                             if (snapshot.hasData &&
                                 snapshot.data != null &&
                                 snapshot.data!.isNotEmpty) {
                               taskData = snapshot.data!;
-                              // ref.read(taskProvider).st;
+                               ref.read(taskProvider).initTaskData(taskData);
                             }
 
                             return DisplayListOfTasks(
@@ -86,7 +86,7 @@ class HomeScreen extends ConsumerWidget {
                     Consumer(
                       builder: (context, ref, child) {
                         return StreamBuilder(
-                          stream: ref.read(taskProvider).getAllTaskData(),
+                          stream: ref.read(taskProvider).getTaskByIsCompleted(true),
                           builder: (context, snapshot) {
                             List<Task> taskData = <Task>[];
                             if (snapshot.hasData &&

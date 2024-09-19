@@ -7,15 +7,19 @@ import 'package:river_pod/features/create_task/view_models/time_view_model.dart'
 import 'package:river_pod/repository/task/repository.dart';
 import 'package:river_pod/resource/utils.dart';
 
-final taskProvider = StateProvider<TaskViewModel>((ref) {
-  return TaskViewModel([], ref);
+final taskProvider = StateProvider((ref) {
+  return TaskViewModel(ref);
 });
 
 class TaskViewModel extends StateNotifier<List<Task>> {
-  TaskViewModel(super.state, this.ref);
+  TaskViewModel(this.ref, [List<Task>? tasks]) : super(tasks ?? []);
 
   final Ref ref;
   final taskInterFace = TaskRepository();
+
+  void initTaskData(List<Task> updatedTasks) {
+    state = updatedTasks;
+  }
 
   Future<void> addTask(
       {required String title,
@@ -41,21 +45,27 @@ class TaskViewModel extends StateNotifier<List<Task>> {
 
   void toggleCompletedStatus(bool updatedStatus, int taskId) {
     try {
-      log("State = $state");
       Task isTask = state.firstWhere(
         (element) => element.id == taskId,
       );
-      log("is updated task == $isTask");
-      isTask.isCompleted == updatedStatus;
-
-      taskInterFace.onUpdateTask(isTask);
+      Task updatedTask = isTask.copyWith(
+        isCompleted: updatedStatus,
+      );
+      log("Task is :: $updatedTask");
+      taskInterFace.onUpdateTask(updatedTask);
     } catch (e) {
       log(e.toString());
       toast(e.toString());
     }
   }
 
-  Stream<List<Task>> getAllTaskData() {
-    return taskInterFace.getAllTaskData();
+  Stream<List<Task>> getTaskByIsCompleted(bool isCompleted) {
+    return taskInterFace.getAllTaskData(isCompleted);
   }
+
+
+  void deleteTask(int taskId){
+    taskInterFace.onDeleteTask(taskId);
+  }
+
 }
