@@ -48,11 +48,22 @@ class DisplayTaskTitle extends StatelessWidget {
                     fontWeight: fontWeight,
                   ),
                 ),
-                Text(
-                  task.time,
-                  style: appStyle.titleMedium?.copyWith(
-                    decoration: textDecoration,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      task.time,
+                      style: appStyle.titleMedium?.copyWith(
+                        decoration: textDecoration,
+                      ),
+                    ),
+                   if(task.toRemember) ...[
+                      6.width,
+                      Icon(
+                        Icons.alarm,
+                        size: 14,
+                      ),
+                    ]
+                  ],
                 ),
               ],
             ),

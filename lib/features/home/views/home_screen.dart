@@ -4,9 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:river_pod/core/extensions/build_context_extensions.dart';
 import 'package:river_pod/database/database.dart';
+import 'package:river_pod/features/drawer/views/drawer_items.dart';
+import 'package:river_pod/features/filter/view_model/selected_date.dart';
+import 'package:river_pod/features/filter/views/filters_widget.dart';
 import 'package:river_pod/features/home/views/widgets/display_list_of_tasks.dart';
 import 'package:river_pod/core/widgets/display_white_text.dart';
 import 'package:river_pod/resource/constant.dart';
+import 'package:river_pod/resource/utils.dart';
 import 'package:river_pod/routes/app_router.gr.dart';
 import 'package:river_pod/state/global_task_state.dart';
 
@@ -16,10 +20,14 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    GlobalKey<ScaffoldState> scaffoldState = GlobalKey<ScaffoldState>();
     final colors = context.colorScheme;
     final deviceSize = context.deviceSize;
+    log("Build Home Screen!");
     return SafeArea(
       child: Scaffold(
+        key: scaffoldState,
+        drawer: const AppDrawer(),
         body: Stack(
           children: [
             Column(
@@ -29,11 +37,45 @@ class HomeScreen extends ConsumerWidget {
                   width: deviceSize.width,
                   color: colors.primary,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const DisplayWhiteText(
-                        text: "Aug 7, 2023",
-                        textSize: 20,
+                      5.height,
+                      SizedBox(
+                        height: 50,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.menu,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                scaffoldState.currentState?.openDrawer();
+                              },
+                            ),
+                            const FiltersWidget()
+                          ],
+                        ),
+                      ),
+                      5.height,
+                      Consumer(
+                        builder: (context, ref, child) {
+                          String selectedDate = ref.watch(selectedDateProvider);
+                          return InkWell(
+                            onTap: () => selectDate(
+                              context,
+                              stringToDateConvert(selectedDate),
+                              onPickDate: (pickDate) {
+                                ref.read(selectedDateProvider.notifier).state = dateToStringConvert(pickDate);
+                              },
+                            ),
+                            child: DisplayWhiteText(
+                              text: selectedDate,
+                              textSize: 20,
+                            ),
+                          );
+                        },
                       ),
                       5.height,
                       const DisplayWhiteText(
@@ -59,9 +101,8 @@ class HomeScreen extends ConsumerWidget {
                     Consumer(
                       builder: (context, ref, child) {
                         return StreamBuilder(
-                          stream: ref
-                              .read(taskProvider)
-                              .getTaskByIsCompleted(false),
+                          stream: ref.read(taskProvider).getTaskByIsCompleted(
+                              false, null),
                           builder: (context, snapshot) {
                             List<Task> taskData = <Task>[];
                             if (snapshot.hasData &&
@@ -86,9 +127,11 @@ class HomeScreen extends ConsumerWidget {
                     12.height,
                     Consumer(
                       builder: (context, ref, child) {
+                        final selectedDate = ref.watch(selectedDateProvider);
                         return StreamBuilder(
-                          stream:
-                              ref.read(taskProvider).getTaskByIsCompleted(true),
+                          stream: ref
+                              .read(taskProvider)
+                              .getTaskByIsCompleted(true, selectedDate),
                           builder: (context, snapshot) {
                             List<Task> taskData = <Task>[];
                             if (snapshot.hasData &&

@@ -4,8 +4,8 @@ import 'package:river_pod/initialized.dart';
 import 'package:river_pod/resource/theme/app_theme.dart';
 import 'package:river_pod/routes/app_router.dart';
 
-void main() {
-  initializedValue();
+Future<void> main() async {
+  await initializedValue();
   runApp(
     const ProviderScope(
       child: MyApp(),

@@ -14,6 +14,12 @@ class TaskTable extends Table {
 
   BoolColumn get isCompleted => boolean()();
 
+  BoolColumn get toRemember => boolean()();
+
+  TextColumn get toRememberTime => text().nullable()();
+
+  TextColumn get toRememberDate => text().nullable()();
+
   TextColumn get category => text()();
 
   @override

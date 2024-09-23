@@ -46,6 +46,27 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("is_completed" IN (0, 1))'));
+  static const VerificationMeta _toRememberMeta =
+      const VerificationMeta('toRemember');
+  @override
+  late final GeneratedColumn<bool> toRemember = GeneratedColumn<bool>(
+      'to_remember', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("to_remember" IN (0, 1))'));
+  static const VerificationMeta _toRememberTimeMeta =
+      const VerificationMeta('toRememberTime');
+  @override
+  late final GeneratedColumn<String> toRememberTime = GeneratedColumn<String>(
+      'to_remember_time', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _toRememberDateMeta =
+      const VerificationMeta('toRememberDate');
+  @override
+  late final GeneratedColumn<String> toRememberDate = GeneratedColumn<String>(
+      'to_remember_date', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _categoryMeta =
       const VerificationMeta('category');
   @override
@@ -53,8 +74,18 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
       'category', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, title, note, time, date, isCompleted, category];
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        note,
+        time,
+        date,
+        isCompleted,
+        toRemember,
+        toRememberTime,
+        toRememberDate,
+        category
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -100,6 +131,26 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
     } else if (isInserting) {
       context.missing(_isCompletedMeta);
     }
+    if (data.containsKey('to_remember')) {
+      context.handle(
+          _toRememberMeta,
+          toRemember.isAcceptableOrUnknown(
+              data['to_remember']!, _toRememberMeta));
+    } else if (isInserting) {
+      context.missing(_toRememberMeta);
+    }
+    if (data.containsKey('to_remember_time')) {
+      context.handle(
+          _toRememberTimeMeta,
+          toRememberTime.isAcceptableOrUnknown(
+              data['to_remember_time']!, _toRememberTimeMeta));
+    }
+    if (data.containsKey('to_remember_date')) {
+      context.handle(
+          _toRememberDateMeta,
+          toRememberDate.isAcceptableOrUnknown(
+              data['to_remember_date']!, _toRememberDateMeta));
+    }
     if (data.containsKey('category')) {
       context.handle(_categoryMeta,
           category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
@@ -127,6 +178,12 @@ class $TaskTableTable extends TaskTable with TableInfo<$TaskTableTable, Task> {
           .read(DriftSqlType.string, data['${effectivePrefix}date'])!,
       isCompleted: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_completed'])!,
+      toRemember: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}to_remember'])!,
+      toRememberTime: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}to_remember_time']),
+      toRememberDate: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}to_remember_date']),
       category: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}category'])!,
     );
@@ -145,6 +202,9 @@ class Task extends DataClass implements Insertable<Task> {
   final String time;
   final String date;
   final bool isCompleted;
+  final bool toRemember;
+  final String? toRememberTime;
+  final String? toRememberDate;
   final String category;
   const Task(
       {this.id,
@@ -153,6 +213,9 @@ class Task extends DataClass implements Insertable<Task> {
       required this.time,
       required this.date,
       required this.isCompleted,
+      required this.toRemember,
+      this.toRememberTime,
+      this.toRememberDate,
       required this.category});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -165,6 +228,13 @@ class Task extends DataClass implements Insertable<Task> {
     map['time'] = Variable<String>(time);
     map['date'] = Variable<String>(date);
     map['is_completed'] = Variable<bool>(isCompleted);
+    map['to_remember'] = Variable<bool>(toRemember);
+    if (!nullToAbsent || toRememberTime != null) {
+      map['to_remember_time'] = Variable<String>(toRememberTime);
+    }
+    if (!nullToAbsent || toRememberDate != null) {
+      map['to_remember_date'] = Variable<String>(toRememberDate);
+    }
     map['category'] = Variable<String>(category);
     return map;
   }
@@ -177,6 +247,13 @@ class Task extends DataClass implements Insertable<Task> {
       time: Value(time),
       date: Value(date),
       isCompleted: Value(isCompleted),
+      toRemember: Value(toRemember),
+      toRememberTime: toRememberTime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toRememberTime),
+      toRememberDate: toRememberDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toRememberDate),
       category: Value(category),
     );
   }
@@ -191,6 +268,9 @@ class Task extends DataClass implements Insertable<Task> {
       time: serializer.fromJson<String>(json['time']),
       date: serializer.fromJson<String>(json['date']),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+      toRemember: serializer.fromJson<bool>(json['toRemember']),
+      toRememberTime: serializer.fromJson<String?>(json['toRememberTime']),
+      toRememberDate: serializer.fromJson<String?>(json['toRememberDate']),
       category: serializer.fromJson<String>(json['category']),
     );
   }
@@ -204,6 +284,9 @@ class Task extends DataClass implements Insertable<Task> {
       'time': serializer.toJson<String>(time),
       'date': serializer.toJson<String>(date),
       'isCompleted': serializer.toJson<bool>(isCompleted),
+      'toRemember': serializer.toJson<bool>(toRemember),
+      'toRememberTime': serializer.toJson<String?>(toRememberTime),
+      'toRememberDate': serializer.toJson<String?>(toRememberDate),
       'category': serializer.toJson<String>(category),
     };
   }
@@ -215,6 +298,9 @@ class Task extends DataClass implements Insertable<Task> {
           String? time,
           String? date,
           bool? isCompleted,
+          bool? toRemember,
+          Value<String?> toRememberTime = const Value.absent(),
+          Value<String?> toRememberDate = const Value.absent(),
           String? category}) =>
       Task(
         id: id.present ? id.value : this.id,
@@ -223,6 +309,11 @@ class Task extends DataClass implements Insertable<Task> {
         time: time ?? this.time,
         date: date ?? this.date,
         isCompleted: isCompleted ?? this.isCompleted,
+        toRemember: toRemember ?? this.toRemember,
+        toRememberTime:
+            toRememberTime.present ? toRememberTime.value : this.toRememberTime,
+        toRememberDate:
+            toRememberDate.present ? toRememberDate.value : this.toRememberDate,
         category: category ?? this.category,
       );
   Task copyWithCompanion(TaskTableCompanion data) {
@@ -234,6 +325,14 @@ class Task extends DataClass implements Insertable<Task> {
       date: data.date.present ? data.date.value : this.date,
       isCompleted:
           data.isCompleted.present ? data.isCompleted.value : this.isCompleted,
+      toRemember:
+          data.toRemember.present ? data.toRemember.value : this.toRemember,
+      toRememberTime: data.toRememberTime.present
+          ? data.toRememberTime.value
+          : this.toRememberTime,
+      toRememberDate: data.toRememberDate.present
+          ? data.toRememberDate.value
+          : this.toRememberDate,
       category: data.category.present ? data.category.value : this.category,
     );
   }
@@ -247,14 +346,17 @@ class Task extends DataClass implements Insertable<Task> {
           ..write('time: $time, ')
           ..write('date: $date, ')
           ..write('isCompleted: $isCompleted, ')
+          ..write('toRemember: $toRemember, ')
+          ..write('toRememberTime: $toRememberTime, ')
+          ..write('toRememberDate: $toRememberDate, ')
           ..write('category: $category')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, note, time, date, isCompleted, category);
+  int get hashCode => Object.hash(id, title, note, time, date, isCompleted,
+      toRemember, toRememberTime, toRememberDate, category);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -265,6 +367,9 @@ class Task extends DataClass implements Insertable<Task> {
           other.time == this.time &&
           other.date == this.date &&
           other.isCompleted == this.isCompleted &&
+          other.toRemember == this.toRemember &&
+          other.toRememberTime == this.toRememberTime &&
+          other.toRememberDate == this.toRememberDate &&
           other.category == this.category);
 }
 
@@ -275,6 +380,9 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
   final Value<String> time;
   final Value<String> date;
   final Value<bool> isCompleted;
+  final Value<bool> toRemember;
+  final Value<String?> toRememberTime;
+  final Value<String?> toRememberDate;
   final Value<String> category;
   const TaskTableCompanion({
     this.id = const Value.absent(),
@@ -283,6 +391,9 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
     this.time = const Value.absent(),
     this.date = const Value.absent(),
     this.isCompleted = const Value.absent(),
+    this.toRemember = const Value.absent(),
+    this.toRememberTime = const Value.absent(),
+    this.toRememberDate = const Value.absent(),
     this.category = const Value.absent(),
   });
   TaskTableCompanion.insert({
@@ -292,12 +403,16 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
     required String time,
     required String date,
     required bool isCompleted,
+    required bool toRemember,
+    this.toRememberTime = const Value.absent(),
+    this.toRememberDate = const Value.absent(),
     required String category,
   })  : title = Value(title),
         note = Value(note),
         time = Value(time),
         date = Value(date),
         isCompleted = Value(isCompleted),
+        toRemember = Value(toRemember),
         category = Value(category);
   static Insertable<Task> custom({
     Expression<int>? id,
@@ -306,6 +421,9 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
     Expression<String>? time,
     Expression<String>? date,
     Expression<bool>? isCompleted,
+    Expression<bool>? toRemember,
+    Expression<String>? toRememberTime,
+    Expression<String>? toRememberDate,
     Expression<String>? category,
   }) {
     return RawValuesInsertable({
@@ -315,6 +433,9 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
       if (time != null) 'time': time,
       if (date != null) 'date': date,
       if (isCompleted != null) 'is_completed': isCompleted,
+      if (toRemember != null) 'to_remember': toRemember,
+      if (toRememberTime != null) 'to_remember_time': toRememberTime,
+      if (toRememberDate != null) 'to_remember_date': toRememberDate,
       if (category != null) 'category': category,
     });
   }
@@ -326,6 +447,9 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
       Value<String>? time,
       Value<String>? date,
       Value<bool>? isCompleted,
+      Value<bool>? toRemember,
+      Value<String?>? toRememberTime,
+      Value<String?>? toRememberDate,
       Value<String>? category}) {
     return TaskTableCompanion(
       id: id ?? this.id,
@@ -334,6 +458,9 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
       time: time ?? this.time,
       date: date ?? this.date,
       isCompleted: isCompleted ?? this.isCompleted,
+      toRemember: toRemember ?? this.toRemember,
+      toRememberTime: toRememberTime ?? this.toRememberTime,
+      toRememberDate: toRememberDate ?? this.toRememberDate,
       category: category ?? this.category,
     );
   }
@@ -359,6 +486,15 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
     if (isCompleted.present) {
       map['is_completed'] = Variable<bool>(isCompleted.value);
     }
+    if (toRemember.present) {
+      map['to_remember'] = Variable<bool>(toRemember.value);
+    }
+    if (toRememberTime.present) {
+      map['to_remember_time'] = Variable<String>(toRememberTime.value);
+    }
+    if (toRememberDate.present) {
+      map['to_remember_date'] = Variable<String>(toRememberDate.value);
+    }
     if (category.present) {
       map['category'] = Variable<String>(category.value);
     }
@@ -374,6 +510,9 @@ class TaskTableCompanion extends UpdateCompanion<Task> {
           ..write('time: $time, ')
           ..write('date: $date, ')
           ..write('isCompleted: $isCompleted, ')
+          ..write('toRemember: $toRemember, ')
+          ..write('toRememberTime: $toRememberTime, ')
+          ..write('toRememberDate: $toRememberDate, ')
           ..write('category: $category')
           ..write(')'))
         .toString();
@@ -399,6 +538,9 @@ typedef $$TaskTableTableCreateCompanionBuilder = TaskTableCompanion Function({
   required String time,
   required String date,
   required bool isCompleted,
+  required bool toRemember,
+  Value<String?> toRememberTime,
+  Value<String?> toRememberDate,
   required String category,
 });
 typedef $$TaskTableTableUpdateCompanionBuilder = TaskTableCompanion Function({
@@ -408,6 +550,9 @@ typedef $$TaskTableTableUpdateCompanionBuilder = TaskTableCompanion Function({
   Value<String> time,
   Value<String> date,
   Value<bool> isCompleted,
+  Value<bool> toRemember,
+  Value<String?> toRememberTime,
+  Value<String?> toRememberDate,
   Value<String> category,
 });
 
@@ -441,6 +586,21 @@ class $$TaskTableTableFilterComposer
 
   ColumnFilters<bool> get isCompleted => $state.composableBuilder(
       column: $state.table.isCompleted,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<bool> get toRemember => $state.composableBuilder(
+      column: $state.table.toRemember,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get toRememberTime => $state.composableBuilder(
+      column: $state.table.toRememberTime,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get toRememberDate => $state.composableBuilder(
+      column: $state.table.toRememberDate,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -483,6 +643,21 @@ class $$TaskTableTableOrderingComposer
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
+  ColumnOrderings<bool> get toRemember => $state.composableBuilder(
+      column: $state.table.toRemember,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get toRememberTime => $state.composableBuilder(
+      column: $state.table.toRememberTime,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get toRememberDate => $state.composableBuilder(
+      column: $state.table.toRememberDate,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
   ColumnOrderings<String> get category => $state.composableBuilder(
       column: $state.table.category,
       builder: (column, joinBuilders) =>
@@ -515,6 +690,9 @@ class $$TaskTableTableTableManager extends RootTableManager<
             Value<String> time = const Value.absent(),
             Value<String> date = const Value.absent(),
             Value<bool> isCompleted = const Value.absent(),
+            Value<bool> toRemember = const Value.absent(),
+            Value<String?> toRememberTime = const Value.absent(),
+            Value<String?> toRememberDate = const Value.absent(),
             Value<String> category = const Value.absent(),
           }) =>
               TaskTableCompanion(
@@ -524,6 +702,9 @@ class $$TaskTableTableTableManager extends RootTableManager<
             time: time,
             date: date,
             isCompleted: isCompleted,
+            toRemember: toRemember,
+            toRememberTime: toRememberTime,
+            toRememberDate: toRememberDate,
             category: category,
           ),
           createCompanionCallback: ({
@@ -533,6 +714,9 @@ class $$TaskTableTableTableManager extends RootTableManager<
             required String time,
             required String date,
             required bool isCompleted,
+            required bool toRemember,
+            Value<String?> toRememberTime = const Value.absent(),
+            Value<String?> toRememberDate = const Value.absent(),
             required String category,
           }) =>
               TaskTableCompanion.insert(
@@ -542,6 +726,9 @@ class $$TaskTableTableTableManager extends RootTableManager<
             time: time,
             date: date,
             isCompleted: isCompleted,
+            toRemember: toRemember,
+            toRememberTime: toRememberTime,
+            toRememberDate: toRememberDate,
             category: category,
           ),
           withReferenceMapper: (p0) => p0

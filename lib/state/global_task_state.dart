@@ -3,6 +3,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:river_pod/database/database.dart';
 import 'package:river_pod/features/create_task/view_models/category_view_model.dart';
 import 'package:river_pod/features/create_task/view_models/date_view_model.dart';
+import 'package:river_pod/features/create_task/view_models/remember_view_model.dart';
 import 'package:river_pod/features/create_task/view_models/time_view_model.dart';
 import 'package:river_pod/repository/task/repository.dart';
 import 'package:river_pod/resource/utils.dart';
@@ -31,13 +32,26 @@ class TaskViewModel extends StateNotifier<List<Task>> {
       required String note,
       required Function() onSuccess}) async {
     try {
+      bool isRemember = ref.read(rememberProvider);
+      final time = timeToStringConvert(ref.read(timeProvider));
+      final date = dateToStringConvert(ref.read(dateProvider));
+      String? toRememberDate;
+      String? toRememberTime;
+      if (isRemember) {
+        toRememberDate = date;
+        toRememberTime = time;
+      }
+
       final task = Task(
         title: title,
-        time: timeToStringConvert(ref.read(timeProvider)),
-        date: dateToStringConvert(ref.read(dateProvider)),
+        time: time,
+        date: date,
         category: ref.read(categoryViewModel).name,
         note: note,
         isCompleted: false,
+        toRemember: isRemember,
+        toRememberDate: toRememberDate,
+        toRememberTime: toRememberTime,
       );
 
       await ref.read(taskRepository).onCreate(task);
@@ -63,8 +77,8 @@ class TaskViewModel extends StateNotifier<List<Task>> {
     }
   }
 
-  Stream<List<Task>> getTaskByIsCompleted(bool isCompleted) {
-    return ref.read(taskRepository).getAllTaskData(isCompleted);
+  Stream<List<Task>> getTaskByIsCompleted(bool isCompleted, String? date) {
+    return ref.read(taskRepository).getAllTaskData(isCompleted, date);
   }
 
   void deleteTask(int taskId) {

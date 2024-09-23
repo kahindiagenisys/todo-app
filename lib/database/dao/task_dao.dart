@@ -9,11 +9,15 @@ part 'task_dao.g.dart';
 class TaskDao extends DatabaseAccessor<AppDatabase> with _$TaskDaoMixin {
   TaskDao(super.db);
 
-  Stream<List<Task>> getAllTask(bool isCompleted) {
+  Stream<List<Task>> getAllTask(bool isCompleted, String? date) {
     return (select(appDataBase.taskTable)
-          ..where(
-            (tbl) => tbl.isCompleted.equals(isCompleted),
-          ))
+          ..where((tbl) {
+            if (date != null) {
+              return tbl.isCompleted.equals(isCompleted) &
+                  tbl.date.equals(date);
+            }
+            return tbl.isCompleted.equals(isCompleted);
+          }))
         .watch();
   }
 }

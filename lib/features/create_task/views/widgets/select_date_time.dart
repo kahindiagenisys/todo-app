@@ -22,7 +22,7 @@ class SelectDateTime extends ConsumerWidget {
             hintText: dateToStringConvert(date),
             readOnly: true,
             suffixIcon: IconButton(
-              onPressed: () => _selectDate(context, ref),
+              onPressed: () => selectDate(context,  ref.read(dateProvider),onPickDate: (pickDate) {  ref.read(dateProvider.notifier).state = pickDate; }),
               icon: const FaIcon(FontAwesomeIcons.calendar),
             ),
           ),
@@ -54,20 +54,5 @@ class SelectDateTime extends ConsumerWidget {
     }
   }
 
-  Future<void> _selectDate(BuildContext ctx, WidgetRef ref) async {
-    int nowYear = DateTime.now().year;
 
-    final initialDate = ref.read(dateProvider);
-
-    DateTime? pickDate = await showDatePicker(
-      context: ctx,
-      initialDate: initialDate,
-      firstDate: DateTime(nowYear - 1),
-      lastDate: DateTime(nowYear + 1),
-    );
-
-    if (pickDate != null) {
-      ref.read(dateProvider.notifier).state = pickDate;
-    }
-  }
 }

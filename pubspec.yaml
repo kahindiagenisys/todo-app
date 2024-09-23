@@ -57,6 +57,9 @@ dependencies:
   # duo tone icons
   font_awesome_flutter: ^10.7.0
 
+  # notifications
+  flutter_local_notifications: ^17.2.3
+
   # built on top of SQLite
   drift: ^2.20.0
   drift_flutter: ^0.2.0
