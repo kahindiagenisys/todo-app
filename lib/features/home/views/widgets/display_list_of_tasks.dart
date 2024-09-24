@@ -41,6 +41,7 @@ class DisplayListOfTasks extends ConsumerWidget {
               physics: const BouncingScrollPhysics(),
               itemBuilder: (ctx, index) {
                 final task = tasks[index];
+
                 return InkWell(
                   onLongPress: () => onLongPress(taskLocator, task),
                   onTap: () => onTap(ctx, task),

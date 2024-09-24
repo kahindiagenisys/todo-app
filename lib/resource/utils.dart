@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -31,6 +33,21 @@ DateTime stringToDateConvert(String date) {
     return DateFormat("MMM dd, yyyy").parse(date);
   } catch (e) {
     return DateTime.now();
+  }
+}
+
+DateTime stringToDateTimeConvert(String date, String time) {
+  try {
+    String dateTimeString = "$date $time";
+    DateTime isDateTime = DateFormat("MMM dd, yyyy h:mm").parse(dateTimeString);
+    if (time.substring(time.length - 2) == "PM") {
+      isDateTime = isDateTime.add(const Duration(hours: 12));
+    }
+
+    return isDateTime;
+  } catch (e) {
+    log("Error $e");
+    rethrow;
   }
 }
 

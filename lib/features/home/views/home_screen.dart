@@ -12,6 +12,7 @@ import 'package:river_pod/core/widgets/display_white_text.dart';
 import 'package:river_pod/resource/constant.dart';
 import 'package:river_pod/resource/utils.dart';
 import 'package:river_pod/routes/app_router.gr.dart';
+import 'package:river_pod/services/notification/local_notification.dart';
 import 'package:river_pod/state/global_task_state.dart';
 
 @RoutePage()
@@ -67,7 +68,8 @@ class HomeScreen extends ConsumerWidget {
                               context,
                               stringToDateConvert(selectedDate),
                               onPickDate: (pickDate) {
-                                ref.read(selectedDateProvider.notifier).state = dateToStringConvert(pickDate);
+                                ref.read(selectedDateProvider.notifier).state =
+                                    dateToStringConvert(pickDate);
                               },
                             ),
                             child: DisplayWhiteText(
@@ -101,8 +103,9 @@ class HomeScreen extends ConsumerWidget {
                     Consumer(
                       builder: (context, ref, child) {
                         return StreamBuilder(
-                          stream: ref.read(taskProvider).getTaskByIsCompleted(
-                              false, null),
+                          stream: ref
+                              .read(taskProvider)
+                              .getTaskByIsCompleted(false, null),
                           builder: (context, snapshot) {
                             List<Task> taskData = <Task>[];
                             if (snapshot.hasData &&
@@ -110,6 +113,12 @@ class HomeScreen extends ConsumerWidget {
                                 snapshot.data!.isNotEmpty) {
                               taskData = snapshot.data!;
                               ref.read(taskProvider).initTaskData(taskData);
+                            }
+
+                            for (Task task in taskData) {
+                              if (task.toRemember) {
+                                showNotification(task);
+                              }
                             }
 
                             return DisplayListOfTasks(
@@ -162,6 +171,20 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void showNotification(Task task) {
+    DateTime showNotificationDateTime =
+        stringToDateTimeConvert(task.toRememberDate!, task.toRememberTime!);
+    if (DateTime.now().isAfter(showNotificationDateTime)) {
+      return;
+    }
+     log("Notification show call!");
+    LocalNotificationServices.scheduleNotification(
+      task.title,
+      task.note,
+      showNotificationDateTime,
     );
   }
 }
