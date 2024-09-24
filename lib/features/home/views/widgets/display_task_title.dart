@@ -56,7 +56,7 @@ class DisplayTaskTitle extends StatelessWidget {
                         decoration: textDecoration,
                       ),
                     ),
-                    if (task.toRemember) ...[
+                    if (task.toRemember && !task.isCompleted) ...[
                       6.width,
                       const Icon(
                         Icons.alarm,
