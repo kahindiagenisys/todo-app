@@ -2,15 +2,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 final FlutterLocalNotificationsPlugin localNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
 
 class LocalNotificationServices {
   static Future<void> initSetting() async {
     AndroidInitializationSettings androidInitializationSettings =
-    const AndroidInitializationSettings("@mipmap/ic_launcher");
+        const AndroidInitializationSettings("@mipmap/ic_launcher");
 
     DarwinInitializationSettings initializationSettingsDarwin =
-    const DarwinInitializationSettings();
+        const DarwinInitializationSettings();
 
     InitializationSettings initializationSettings = InitializationSettings(
       android: androidInitializationSettings,
@@ -25,15 +25,17 @@ class LocalNotificationServices {
 
     await localNotificationsPlugin
         .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.requestNotificationsPermission();
   }
 
-  static void onDidReceiveNotification(
-      NotificationResponse notificationResponse) {}
+  static Future<void> onDidReceiveNotification(
+      NotificationResponse notificationResponse) async {}
 
-  static Future<void> showInstantNotification(String title,
-      String body,) async {
+  static Future<void> showInstantNotification(
+    String title,
+    String body,
+  ) async {
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
         android: AndroidNotificationDetails(
           "channel_id",
@@ -51,15 +53,18 @@ class LocalNotificationServices {
     );
   }
 
-  static Future<void> scheduleNotification(String title,
-      String body,
-      DateTime scheduledDate,) async {
-     NotificationDetails platformChannelSpecifics = const NotificationDetails(
+  static Future<void> scheduleNotification(
+    String title,
+    String body,
+    DateTime scheduledDate,
+  ) async {
+    NotificationDetails platformChannelSpecifics = const NotificationDetails(
         android: AndroidNotificationDetails(
           "channel_id",
           "channel_name",
           importance: Importance.high,
           priority: Priority.high,
+          fullScreenIntent: true,
         ),
         iOS: DarwinNotificationDetails());
 
@@ -69,7 +74,9 @@ class LocalNotificationServices {
       body,
       tz.TZDateTime.from(scheduledDate, tz.local),
       platformChannelSpecifics,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dateAndTime,
     );
   }

@@ -180,7 +180,7 @@ class HomeScreen extends ConsumerWidget {
     if (DateTime.now().isAfter(showNotificationDateTime)) {
       return;
     }
-     log("Notification show call!");
+    log("Notification show call!");
     LocalNotificationServices.scheduleNotification(
       task.title,
       task.note,
